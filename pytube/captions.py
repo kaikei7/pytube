@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ElementTree
 from html import unescape
 from typing import Dict, Optional
 
-from pytube import request
+from pytube import request 
 from pytube.helpers import safe_filename, target_directory
 
 
@@ -73,14 +73,16 @@ class Caption:
         """
         segments = []
         root = ElementTree.fromstring(xml_captions)
-        for i, child in enumerate(list(root)):
-            text = child.text or ""
+        for i, child in enumerate(list(root.findall('body/p'))):
+            text = ''.join(child.itertext()).strip()
+            if not text:
+              continue
             caption = unescape(text.replace("\n", " ").replace("  ", " "),)
             try:
-                duration = float(child.attrib["dur"])
+                duration = float(child.attrib["d"])
             except KeyError:
                 duration = 0.0
-            start = float(child.attrib["start"])
+            start = float(child.attrib["t"])
             end = start + duration
             sequence_number = i + 1  # convert from 0-indexed to 1.
             line = "{seq}\n{start} --> {end}\n{text}\n".format(
